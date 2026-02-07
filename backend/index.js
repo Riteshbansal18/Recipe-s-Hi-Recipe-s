@@ -11,12 +11,12 @@ const server = http.createServer(app);
 // 🔥 SOCKET SERVER
 const io = new Server(server, {
   cors: {
-    origin: "*", // later production me restrict karenge
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
 
-// 🔥 IMPORTANT: io ko app ke andar store karo
+// 🔥 make io accessible in controllers
 app.set("io", io);
 
 const connectDB = require("./connection");
@@ -53,11 +53,14 @@ io.on("connection", (socket) => {
   });
 });
 
+// ✅ IMPORTANT FIX
+const PORT = process.env.PORT || 8080;
+
 const startServer = async () => {
   await connectDB();
 
-  server.listen(process.env.PORT, () => {
-    console.log("🚀 Server running at port:", process.env.PORT);
+  server.listen(PORT, () => {
+    console.log("🚀 Server running at port:", PORT);
   });
 };
 
