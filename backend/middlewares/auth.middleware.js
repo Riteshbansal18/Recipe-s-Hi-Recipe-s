@@ -10,7 +10,7 @@ const auth = async (req, res, next) => {
       return res.status(440).json({ message: "Session Expired, Login Again" });
     }
 
-    jwt.verify(token, process.env.JWT_SECRET_KEY, function (err, decoded) {
+    jwt.verify(token, process.env.JWT_SECRET, function (err, decoded) {
       if (decoded) {
         // console.log(decoded, "");
         // req.body.userId = decoded.userId;

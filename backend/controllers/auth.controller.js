@@ -66,7 +66,7 @@ exports.loginUser = async (req, res, next) => {
             .json({ message: "Invalid password,Try again" });
         }
 
-        var token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY);
+        var token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
         res
           .status(200)
           .json({ message: `Welcome back ${user.name}`, token: token });
