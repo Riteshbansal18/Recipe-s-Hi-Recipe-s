@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
-import { BiLike, BiChat, BiShare } from "react-icons/bi";
+import { BiLike, BiShare } from "react-icons/bi";
 import { Carousel } from "./Carousel";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -17,523 +17,311 @@ import {
   IconButton,
   Button,
   Divider,
-  Center,
-  WrapItem,
   Image,
-  Editable,
-  EditablePreview,
-  EditableInput,
   Input,
   useToast,
   Spinner,
 } from "@chakra-ui/react";
-import { updateRecipe } from "../../redux/recipeReducer/actions";
-import { updateUser } from "../../redux/userReducer/actions";
 import axios from "axios";
-import { getFeed } from "../../redux/recipeReducer/actions";
+import { updateRecipe, getFeed } from "../../redux/recipeReducer/actions";
+import { updateUser } from "../../redux/userReducer/actions";
 import { useNavigate } from "react-router-dom";
 
 export default function FeedCard({ recipe }) {
   const toast = useToast();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { loggedInUser, token } = useSelector((store) => store.authReducer);
-  const [liked, setLiked] = useState(recipe.likes.includes(loggedInUser._id));
-  const [saved, setSaved] = useState(
-    loggedInUser.savedRecipes.includes(recipe._id)
+
+  const { loggedInUser, token } = useSelector(
+    (store) => store.authReducer
   );
 
-  const addLikeHandler = () => {
-    // Check if the loggedInUser has not already liked the recipe
-    if (!liked) {
-      // Perform the like operation here, e.g., send a request to your API
-      // Update the local state or Redux state accordingly
-      let newLikes = [...recipe.likes, loggedInUser._id];
-      let newLikedRecipes = [...loggedInUser.likedRecipes];
-      if (!newLikedRecipes.includes(recipe._id)) {
-        newLikedRecipes.push(recipe._id);
-      }
-      console.log(newLikes, 1, newLikedRecipes, 2);
+  /* =========================
+      SAFE IDS
+  ========================= */
+  const userId = loggedInUser?._id || null;
+  const recipeId = recipe?._id || null;
 
-      dispatch(
-        updateRecipe(recipe._id, { likes: newLikes }, token, toast, "like")
-      );
-      dispatch(
-        updateUser(
-          loggedInUser._id,
-          { likedRecipes: newLikedRecipes },
-          token,
-          toast,
-          "like",
-          recipe._id
-        )
-      );
-    }
+  /* =========================
+      STATES (INITIAL)
+  ========================= */
+  const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+
+  /* =========================
+      SYNC STATE AFTER LOAD
+  ========================= */
+  useEffect(() => {
+    if (!loggedInUser || !recipe) return;
+
+    setLiked(recipe.likes?.includes(userId));
+    setSaved(loggedInUser.savedRecipes?.includes(recipeId));
+    setComments(recipe.comments || []);
+  }, [loggedInUser, recipe, userId, recipeId]);
+
+  /* =========================
+      LOADING GUARD
+  ========================= */
+  if (!loggedInUser || !recipe) {
+    return (
+      <Flex justify="center" py={10}>
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
+
+  /* =========================
+      LIKE / UNLIKE
+  ========================= */
+  const addLikeHandler = () => {
+    if (liked) return;
+
+    dispatch(
+      updateRecipe(
+        recipeId,
+        { likes: [...recipe.likes, userId] },
+        token
+      )
+    );
+
+    dispatch(
+      updateUser(
+        userId,
+        { likedRecipes: [...loggedInUser.likedRecipes, recipeId] },
+        token
+      )
+    );
+
+    setLiked(true);
   };
 
   const removeLikeHandler = () => {
-    // Check if the loggedInUser has already liked the recipe
-    if (liked) {
-      let newLikes = [...recipe.likes].filter(
-        (like) => like != loggedInUser._id
-      );
-      let newLikedRecipes = [...loggedInUser.likedRecipes].filter(
-        (recipeId) => recipeId != recipe._id
-      );
+    if (!liked) return;
 
-      console.log(newLikes, 1, newLikedRecipes, 2);
-      // Perform the unlike operation here, e.g., send a request to your API
-      dispatch(
-        updateRecipe(recipe._id, { likes: newLikes }, token, toast, "dislike")
-      );
-      // Update the local state or Redux state accordingly
-      dispatch(
-        updateUser(
-          loggedInUser._id,
-          { likedRecipes: newLikedRecipes },
-          token,
-          toast,
-          "dislike",
-          recipe._id
-        )
-      );
-    }
+    dispatch(
+      updateRecipe(
+        recipeId,
+        { likes: recipe.likes.filter((id) => id !== userId) },
+        token
+      )
+    );
+
+    dispatch(
+      updateUser(
+        userId,
+        {
+          likedRecipes: loggedInUser.likedRecipes.filter(
+            (id) => id !== recipeId
+          ),
+        },
+        token
+      )
+    );
+
+    setLiked(false);
   };
 
+  /* =========================
+      SAVE / UNSAVE
+  ========================= */
   const saveRecipeHandler = () => {
-    // Check if the recipe is not already saved
-    if (!saved) {
-      let newSavedRecipes = [...loggedInUser.savedRecipes, recipe._id];
+    if (saved) return;
 
-      // Perform the save operation here, e.g., send a request to your API
-      // Update the local state or Redux state accordingly
-      dispatch(
-        updateUser(
-          loggedInUser._id,
-          { savedRecipes: newSavedRecipes },
-          token,
-          toast,
-          "save",
-          recipe._id
-        )
-      );
+    dispatch(
+      updateUser(
+        userId,
+        { savedRecipes: [...loggedInUser.savedRecipes, recipeId] },
+        token
+      )
+    );
 
-      setSaved(true);
-    }
+    setSaved(true);
   };
 
   const unsaveRecipeHandler = () => {
-    // Check if the recipe is already saved
-    if (saved) {
-      let newSavedRecipes = loggedInUser.savedRecipes.filter(
-        (savedRecipeId) => savedRecipeId !== recipe._id
+    if (!saved) return;
+
+    dispatch(
+      updateUser(
+        userId,
+        {
+          savedRecipes: loggedInUser.savedRecipes.filter(
+            (id) => id !== recipeId
+          ),
+        },
+        token
+      )
+    );
+
+    setSaved(false);
+  };
+
+  /* =========================
+      DELETE RECIPE
+  ========================= */
+  const deleteRecipeHandler = async () => {
+    try {
+      await axios.delete(
+        `${process.env.REACT_APP_API_URL}/recipe/delete/${recipeId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
-      // Perform the unsave operation here, e.g., send a request to your API
-      // Update the local state or Redux state accordingly
-      dispatch(
-        updateUser(
-          loggedInUser._id,
-          { savedRecipes: newSavedRecipes },
-          token,
-          toast,
-          "unsave",
-          recipe._id
-        )
-      );
+      toast({
+        title: "Recipe deleted",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
 
-      setSaved(false);
+      dispatch(getFeed(token));
+    } catch {
+      toast({
+        title: "Failed to delete recipe",
+        status: "error",
+      });
     }
   };
 
-  const [comments, setComments] = useState(recipe.comments);
-  const [newComment, setNewComment] = useState("");
-  const [editingComment, setEditingComment] = useState(null);
-  const reversedComments = comments.slice().reverse().slice(0, 3);
-
+  /* =========================
+      ADD COMMENT
+  ========================= */
   const addCommentHandler = async () => {
-    if (newComment.trim() === "") {
-      return;
-    }
+    if (!newComment.trim()) return;
 
     try {
-      // Send a request to add a new comment
-      const response = await axios.post(
+      const res = await axios.post(
         `${process.env.REACT_APP_API_URL}/comment/add`,
         {
           text: newComment,
-          userId: loggedInUser._id,
-          recipeId: recipe._id,
+          recipeId,
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-      toast({
-        title: "Comment Added Successfully",
-        status: "success",
-        duration: 1000,
-        isClosable: true,
-      });
-      setComments([...comments, response.data.comment]);
+
+      setComments([...comments, res.data.comment]);
       setNewComment("");
       dispatch(getFeed(token));
-    } catch (error) {
-      // Handle errors and display a toast message
+    } catch {
       toast({
-        title: "Couldn't add comment",
+        title: "Failed to add comment",
         status: "error",
-        duration: 1000,
-        isClosable: true,
       });
     }
   };
 
-  const updateCommentHandler = async () => {
-    if (newComment.trim() === "") return;
-
-    try {
-      // Send a request to update the comment
-      const response = await axios.patch(
-        `${process.env.REACT_APP_API_URL}/comment/update/${editingComment}`,
-        { text: newComment },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      // Update the local state to reflect the updated comment
-      const updatedComments = comments.map((comment) => {
-        if (comment._id === editingComment) {
-          return response.data.comment;
-        }
-        return comment;
-      });
-      toast({
-        title: "Comment Updated Successfully",
-        status: "success",
-        duration: 1000,
-        isClosable: true,
-      });
-      setComments(updatedComments);
-      setEditingComment(null);
-      setNewComment("");
-      dispatch(getFeed(token));
-    } catch (error) {
-      // Handle errors and display a toast message
-      toast({
-        title: "Couldn't update comment",
-        status: "error",
-        duration: 1000,
-        isClosable: true,
-      });
-    }
-  };
-
-  const deleteCommentHandler = async (commentId) => {
-    try {
-      // Send a request to delete the comment
-      await axios.delete(
-        `${process.env.REACT_APP_API_URL}/comment/delete/${commentId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      toast({
-        title: "Comment Deleted Successfully",
-        status: "sucess",
-        duration: 1000,
-        isClosable: true,
-      });
-      // Update the local state to remove the deleted comment
-      setComments((prevComments) =>
-        prevComments.filter((comment) => comment._id !== commentId)
-      );
-      dispatch(getFeed(token));
-    } catch (error) {
-      // Handle errors and display a toast message
-      toast({
-        title: "Couldn't delete comment",
-        status: "error",
-        duration: 1000,
-        isClosable: true,
-      });
-    }
-  };
-
-  if (!recipe) {
-    return (
-      <>
-        <Spinner
-          thickness="4px"
-          speed="0.65s"
-          emptyColor="gray.200"
-          color="blue.500"
-          size="2xl"
-        />
-      </>
-    ); 
-  }
+  /* =========================
+      JSX
+  ========================= */
   return (
-    <div style={{ marginBlock: "0 2rem" }}>
-      <Card
-        w="100%"
-        mb="10px"
-        p="10px"
-        transition="0.2s ease-in"
-        boxShadow="md"
-        _hover={{ boxShadow: "lg" }}
-      >
-        <CardHeader>
-          <Flex spacing="4">
-            <Flex flex="1" gap="4" alignItems="center" flexWrap="wrap">
-              <Avatar size="lg" src={recipe.userId.profileImage} />
-              <Center height="50px">
-                <Divider orientation="vertical" />
-              </Center>
-              <Box>
-                <Heading size="lg" mb={2}>
-                  {recipe.userId.name}
-                </Heading>
-                <Text>{recipe.caption}</Text>
-              </Box>
-            </Flex>
+    <Card mb="2rem" boxShadow="md">
+      {/* ---------- HEADER ---------- */}
+      <CardHeader>
+        <Flex justify="space-between" align="center">
+          <Flex gap="4" align="center">
+            <Avatar src={recipe.userId?.profileImage} />
+            <Box>
+              <Heading size="md">{recipe.userId?.name}</Heading>
+              <Text fontSize="sm">{recipe.caption}</Text>
+            </Box>
+          </Flex>
+
+          <Flex gap={2}>
             <IconButton
               variant="ghost"
-              icon={
-                saved ? (
-                  <BsBookmarkFill color="#fb8500" size={32} />
-                ) : (
-                  <BsBookmark color="#8c8c8c" size={32} />
-                )
-              } // Use filled or unfilled bookmark icon based on saved state
-              onClick={() => {
-                if (saved) {
-                  unsaveRecipeHandler();
-                } else {
-                  saveRecipeHandler();
-                }
-              }}
+              icon={saved ? <BsBookmarkFill /> : <BsBookmark />}
+              onClick={saved ? unsaveRecipeHandler : saveRecipeHandler}
             />
+
+            {userId === recipe.userId?._id && (
+              <Button
+                size="sm"
+                colorScheme="red"
+                variant="outline"
+                onClick={deleteRecipeHandler}
+              >
+                Delete
+              </Button>
+            )}
           </Flex>
-        </CardHeader>
-        <CardBody w="100%" mx="auto">
-          <Divider width="100%" mx="auto" mb="10" />
-          <Carousel images={recipe.images}></Carousel>
+        </Flex>
+      </CardHeader>
 
-          <CardFooter
-            px="0"
-            justify="flex-start"
-            gap="1rem"
-            flexWrap="wrap"
-            sx={{
-              "& > button": {
-                minW: "136px",
-              },
-            }}
-          >
-            <Button
-              flex="0.25"
-              bg={liked ? "primary.500" : "#fff"}
-              color={liked ? "#fff" : "secondary"}
-              variant="outline"
-              onClick={() => {
-                setLiked((prev) => !prev);
-                if (liked) {
-                  removeLikeHandler();
-                } else {
-                  addLikeHandler();
-                }
-              }}
-            >
-              <BiLike color={liked ? "#fff" : "text"} />
-              <Text ml="4px">{recipe.likes.length}</Text>
-            </Button>
-            <Button
-              flex="0.25"
-              onClick={() => navigate(`/recipe/${recipe._id}`)}
-              variant="outline"
-              color="secondary"
-              leftIcon={<BiShare />}
-            >
-              View Recipe
-            </Button>
-          </CardFooter>
-          <Divider width="100%" mx="auto" mb="5" />
-          <Flex alignItems={"center"} justifyContent={"space-between"}>
-            <Heading as="h3" mb={"0.5rem"}>
-              {recipe.title}
-            </Heading>
-            <Image
-              w="2rem"
-              h="2rem"
-              objectFit="contain"
-              src={`/images/${
-                recipe.veg ? "veg-icon.png" : "non-veg-icon.png"
-              }`}
-            ></Image>
-          </Flex>
-          <Flex
-            align="center"
-            justifyContent="space-between"
-            py={1}
-            mb="0.5rem"
-          >
-            <Text
-              my={3}
-              fontFamily={"Kaushan Script"}
-              fontSize="xl"
-              fontWeight="bold"
-              color="primary.500"
-            >
-              {recipe.cuisine}
-            </Text>
-            <Flex mt={3} flexWrap="wrap" gap={4}>
-              {recipe?.tags?.length > 0 &&
-                recipe?.tags.map((e, index) => <Tag key={index}>{e}</Tag>)}
-            </Flex>
-          </Flex>
-          <Text mb="0.5rem">{recipe.description}</Text>
-          <Text as="strong">
-            {comments.length} {comments.length === 1 ? "comment" : "comments"}
-          </Text>
+      {/* ---------- BODY ---------- */}
+      <CardBody>
+        <Carousel images={recipe.images || []} />
 
-          {/* Render existing comments */}
-          {reversedComments?.map((comment) => {
-            // console.log(comment.userId, loggedInUser, "aaaaaaaaaaaaa");
-            return comment.userId._id == loggedInUser._id ? (
-              <>
-                <div key={comment._id}>
-                  <Flex gap="3rem" alignItems={"center"} my={4}>
-                    <WrapItem display="flex" alignItems={"center"} width="100%">
-                      <div
-                        style={{
-                          width: "30%",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "1rem",
-                          paddingInline: "0.5rem",
-                          marginRight: "1rem",
-                          borderRight: "1px solid #3337",
-                        }}
-                      >
-                        <Avatar
-                          size="sm"
-                          name="Kent Dodds"
-                          src={`${process.env.REACT_APP_API_URL}/${comment.userId.profileImage}`}
-                        />
-                        <Text
-                          as="p"
-                          justifySelf="flex-start"
-                          ml="8px"
-                          fontWeight={"500"}
-                        >
-                          {comment.userId.name}
-                        </Text>
-                      </div>
-                      {/* <Text letterSpacing={"1px"}>{comment.text}</Text> */}
-
-                      <Editable
-                        defaultValue={comment.text}
-                        position="relative"
-                        flexGrow={1}
-                        isPreviewFocusable={true}
-                        onFocus={() => setEditingComment(comment._id)}
-                      >
-                        <EditablePreview />
-                        <EditableInput
-                          p={2}
-                          value={comment.text}
-                          onChange={(e) => setNewComment(e.target.value)}
-                        ></EditableInput>
-                        <Flex
-                          alignItems={"center"}
-                          gap="0.5rem"
-                          position="absolute"
-                          right="2px"
-                          top="50%"
-                          transform="translateY(-50%)"
-                        >
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              updateCommentHandler();
-                              setEditingComment(null);
-                            }}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="outline"
-                            disabled={true}
-                            size="sm"
-                            // onClick={() => {
-                            //   deleteCommentHandler(comment._id);
-                            //   setEditingComment(null);
-                            // }}
-                          >
-                            Delete
-                          </Button>
-                        </Flex>
-                      </Editable>
-                    </WrapItem>
-                  </Flex>
-                </div>
-              </>
-            ) : (
-              <div key={comment._id}>
-                <Flex gap="3rem" alignItems={"center"} my={4}>
-                  <WrapItem display="flex" alignItems={"center"} width="100%">
-                    <div
-                      style={{
-                        width: "30%",
-                        display: "flex",
-                        gap: "1rem",
-                        paddingInline: "0.5rem",
-                        marginRight: "1rem",
-                        borderRight: "1px solid #3337",
-                      }}
-                    >
-                      <Avatar
-                        size="sm"
-                        name="Kent Dodds"
-                        src={`${process.env.REACT_APP_API_URL}/${comment.userId.profileImage}`}
-                      />
-                      <Text
-                        as="p"
-                        justifySelf="flex-start"
-                        ml="8px"
-                        fontWeight={"500"}
-                      >
-                        {comment.userId.name}
-                      </Text>
-                    </div>
-                    <Text letterSpacing={"1px"}>{comment.text}</Text>
-                  </WrapItem>
-                </Flex>
-              </div>
-            );
-          })}
-
-          {/* Add a new comment */}
-          <Input
-            onChange={(e) => setNewComment(e.target.value)}
-            focusBorderColor="transparent"
-            _focus={{ boxShadow: "none" }}
-            border="none"
-            type="text"
-            placeholder="Add a comment..."
+        <Flex mt={4} align="center" justify="space-between">
+          <Heading size="md">{recipe.title}</Heading>
+          <Image
+            w="24px"
+            src={`/images/${
+              recipe.veg ? "veg-icon.png" : "non-veg-icon.png"
+            }`}
           />
-          <Button onClick={addCommentHandler}>{"Add Comment"}</Button>
-        </CardBody>
-      </Card>
-    </div>
+        </Flex>
+
+        <Text mt={2}>{recipe.description}</Text>
+
+        <Flex mt={3} gap={2} wrap="wrap">
+          {recipe.tags?.map((tag, i) => (
+            <Tag key={i}>{tag}</Tag>
+          ))}
+        </Flex>
+      </CardBody>
+
+      {/* ---------- FOOTER ---------- */}
+      <CardFooter gap={3}>
+        <Button
+          onClick={liked ? removeLikeHandler : addLikeHandler}
+          leftIcon={<BiLike />}
+          variant="outline"
+        >
+          {recipe.likes.length}
+        </Button>
+
+        <Button
+          variant="outline"
+          leftIcon={<BiShare />}
+          onClick={() => navigate(`/recipe/${recipeId}`)}
+        >
+          View
+        </Button>
+      </CardFooter>
+
+      <Divider />
+
+      {/* ---------- COMMENTS ---------- */}
+      <Box p={4}>
+        <Text fontWeight="bold">{comments.length} Comments</Text>
+
+        {comments
+          .filter((c) => c.userId)
+          .slice(-3)
+          .map((comment) => (
+            <Flex key={comment._id} mt={3} gap={3}>
+              <Avatar size="sm" src={comment.userId.profileImage} />
+              <Box>
+                <Text fontWeight="bold">{comment.userId.name}</Text>
+                <Text fontSize="sm">{comment.text}</Text>
+              </Box>
+            </Flex>
+          ))}
+
+        <Flex mt={3} gap={2}>
+          <Input
+            placeholder="Add a comment..."
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+          />
+          <Button onClick={addCommentHandler}>Post</Button>
+        </Flex>
+      </Box>
+    </Card>
   );
 }

@@ -2,7 +2,22 @@ require("dotenv").config();
 
 const cors = require("cors");
 const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+
 const app = express();
+const server = http.createServer(app);
+
+// 🔥 SOCKET SERVER
+const io = new Server(server, {
+  cors: {
+    origin: "*", // later production me restrict karenge
+    methods: ["GET", "POST"],
+  },
+});
+
+// 🔥 IMPORTANT: io ko app ke andar store karo
+app.set("io", io);
 
 const connectDB = require("./connection");
 
@@ -29,10 +44,19 @@ app.use("/comment", commentRoutes);
 app.use("/notification", notiRoutes);
 app.use("/chat", chatRouter);
 
+// 🔥 SOCKET CONNECTION
+io.on("connection", (socket) => {
+  console.log("🟢 User connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("🔴 User disconnected:", socket.id);
+  });
+});
+
 const startServer = async () => {
   await connectDB();
 
-  app.listen(process.env.PORT, () => {
+  server.listen(process.env.PORT, () => {
     console.log("🚀 Server running at port:", process.env.PORT);
   });
 };

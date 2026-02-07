@@ -31,5 +31,6 @@ chatRouter.get("/getmessage/:firstId/:secondId", async (req, res) => {
     res.status(400).send({ error: error.message });
   }
 });
-
+// router.post("/send", chatController.sendMessage);
+// router.get("/:otherUserId", chatController.getMessages);
 module.exports = chatRouter;

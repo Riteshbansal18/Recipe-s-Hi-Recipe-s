@@ -2,49 +2,56 @@ import {
   ADDRECIPE_ERROR,
   ADDRECIPE_LOADING,
   ADDRECIPE_SUCCESS,
-  GETRECIPE_ERROR,
-  GETRECIPE_LOADING,
-  GETRECIPE_SUCCESS,
   GET_FEED_ERROR,
   GET_FEED_LOADING,
   GET_FEED_SUCCESS,
-  UPDATE_RECIPE_SUCCESS,
 } from "./actionTypes";
 
 import axios from "axios";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
+/* =========================
+   ADD NEW RECIPE
+========================= */
 export const addNewRecipe =
   (token, recipe, toast, navigate, closeModal) => async (dispatch) => {
     dispatch({ type: ADDRECIPE_LOADING });
-    console.log(recipe);
+
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/recipe/add`,
+        `${API_URL}/recipe/add`,
         recipe,
         {
           headers: {
-            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
-      console.log(response);
-      dispatch({ type: ADDRECIPE_SUCCESS, payload: response.data.recipe }); //add payload after successful post
+
+      dispatch({
+        type: ADDRECIPE_SUCCESS,
+        payload: response.data.recipe,
+      });
+
       toast({
-        title: "Recipe Created Successfully",
-        description: `${response.data.message}`,
+        title: "Recipe Created",
+        description: response.data.message,
         status: "success",
         duration: 3000,
         isClosable: true,
       });
+
       closeModal();
       navigate("/feed");
     } catch (err) {
-      console.log(err);
       dispatch({ type: ADDRECIPE_ERROR });
+
       toast({
         title: "Failed To Add Recipe",
-        description: `${err.response.data.message}`,
+        description:
+          err.response?.data?.message || "Something went wrong",
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -52,45 +59,49 @@ export const addNewRecipe =
     }
   };
 
+/* =========================
+   GET USER FEED
+========================= */
 export const getFeed = (token) => async (dispatch) => {
   dispatch({ type: GET_FEED_LOADING });
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+
   try {
-    const response = await axios.get(
-      `${process.env.REACT_APP_API_URL}/recipe/feed`,
-      config
+    const res = await axios.get(
+      `${API_URL}/recipe/feed`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
     );
-    // console.log(response.data);
 
-    const recipes = response.data.feed;
+    const recipes = res.data.feed.map((recipe) => ({
+      ...recipe,
+      images: recipe.images.map(
+        (img) => `${API_URL}/${img}`
+      ),
+      userId: {
+        ...recipe.userId,
+        profileImage: recipe.userId?.profileImage
+          ? `${API_URL}/${recipe.userId.profileImage}`
+          : null,
+      },
+    }));
 
-    for (let recipe of recipes) {
-      recipe.images = recipe.images.map((image) => {
-        return `${process.env.REACT_APP_API_URL}/${image}`;
-      });
-
-      // Update profileImage URL for the user in the recipe
-      recipe.userId.profileImage = `${process.env.REACT_APP_API_URL}/${recipe.userId.profileImage}`;
-    }
-
-    // console.log(recipes);
     dispatch({ type: GET_FEED_SUCCESS, payload: recipes });
-  } catch (error) {
-    console.log("Error fetching user data:", error);
+  } catch (err) {
     dispatch({ type: GET_FEED_ERROR });
   }
 };
 
+/* =========================
+   UPDATE RECIPE
+========================= */
 export const updateRecipe =
-  (id, recipe, token, toast, type) => async (dispatch) => {
+  (id, recipe, token, toast) => async (dispatch) => {
     dispatch({ type: ADDRECIPE_LOADING });
+
     try {
-      const response = await axios.patch(
-        `${process.env.REACT_APP_API_URL}/recipe/update/${id}`,
+      await axios.patch(
+        `${API_URL}/recipe/update/${id}`,
         recipe,
         {
           headers: {
@@ -98,35 +109,38 @@ export const updateRecipe =
           },
         }
       );
-      console.log(response.data);
-      // dispatch({
-      //   type: UPDATE_RECIPE_SUCCESS,
-      //   payload: response.data.updatedRecipe,
-      // });
+
       dispatch(getFeed(token));
     } catch (err) {
-      console.log("failed to update recipe", err);
       dispatch({ type: ADDRECIPE_ERROR });
+
+      toast({
+        title: "Failed To Update Recipe",
+        description:
+          err.response?.data?.message || "Update failed",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
-export const getSingleRecipe = (token, id) => {
-  const config = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
-
-  return axios
-    .get(
-      `${process.env.REACT_APP_API_URL}/recipe/getSingleRecipe/${id}`,
-      config
-    )
-    .then((res) => {
-      // console.log(res.data)
-      return res.data;
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+/* =========================
+   GET SINGLE RECIPE
+========================= */
+export const getSingleRecipe = async (token, id) => {
+  try {
+    const res = await axios.get(
+      `${API_URL}/recipe/getSingleRecipe/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return res.data;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
 };

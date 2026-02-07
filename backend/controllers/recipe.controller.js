@@ -3,185 +3,200 @@ const User = require("../models/User.model");
 const Comment = require("../models/Comment.model");
 const Notification = require("../models/Notification.model");
 
-exports.addNewRecipe = async (req, res, next) => {
-  const images = [];
-  if (req.files && req.files.length > 0) {
-    req.files.forEach((file) => {
-      images.push(file.path);
-    });
-  }
+/* =========================
+   ADD NEW RECIPE (SOCKET ENABLED)
+========================= */
+exports.addNewRecipe = async (req, res) => {
   try {
+    const images = [];
+
+    if (req.files && req.files.length > 0) {
+      req.files.forEach((file) => images.push(file.path));
+    }
+
     const newRecipe = new Recipe({
       ...req.body,
       userId: req.userId,
-      images: images,
+      images,
     });
 
     await newRecipe.save();
 
-    // Fetch the user who created the recipe
-    const user = await User.findOne({ _id: req.userId });
+    // populate for frontend use
+    const populatedRecipe = await Recipe.findById(newRecipe._id)
+      .populate("userId")
+      .populate({
+        path: "comments",
+        populate: { path: "userId" },
+      });
 
-    // Create a notification for the owner of the recipe (the user who posted the recipe)
+    // notification for self
+    const user = await User.findById(req.userId);
+
     const notification = new Notification({
-      message: `You created a new recipe post`,
-      time: new Date().toISOString(),
+      message: "You created a new recipe post",
+      time: new Date(),
       type: "post",
       userId: req.userId,
-      senderImage: user.profileImage,
+      senderImage: user?.profileImage || null,
     });
 
     await notification.save();
 
-    // Update the user's recipes
-    let userRecipes = [...user.recipes, newRecipe._id];
-    await User.findByIdAndUpdate(req.userId, { recipes: userRecipes });
+    await User.findByIdAndUpdate(req.userId, {
+      $push: { recipes: newRecipe._id },
+    });
+
+    // 🔥 SOCKET EMIT (CORRECT WAY)
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("new-recipe", populatedRecipe);
+    }
 
     res.status(201).json({
       message: "Recipe created successfully",
-      recipe: newRecipe,
+      recipe: populatedRecipe,
     });
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Recipe creation failed" });
   }
 };
 
-exports.getAllRecipe = async (req, res, next) => {
+/* =========================
+   GET ALL RECIPES (EXPLORE)
+========================= */
+exports.getAllRecipe = async (req, res) => {
   try {
     const { cuisine, impression, veg } = req.query;
     const filter = {};
-    
+    const sort = {};
+
     if (cuisine) {
       filter.cuisine = { $in: JSON.parse(cuisine) };
     }
-    console.log(cuisine)
-    
+
     if (veg === "veg" || veg === "non-veg") {
       filter.veg = veg === "veg";
     }
 
-    const sort = {};
-
-    if (impression) {
-      if (impression === "asc") {
-        sort["likes"] = 1; // Sort in ascending order of likes array length
-      } else if (impression === "desc") {
-        sort["likes"] = -1; // Sort in descending order of likes array length
-      }
-    }
+    if (impression === "asc") sort.likes = 1;
+    if (impression === "desc") sort.likes = -1;
 
     const recipes = await Recipe.find(filter)
       .sort(sort)
       .populate("userId")
       .populate("likes")
-      .populate("comments");
+      .populate({
+        path: "comments",
+        populate: { path: "userId" },
+      });
+
     res.status(200).json(recipes);
   } catch (error) {
-    return res.status(500).json({ message: "Failed to get recipes", error });
+    res.status(500).json({ message: "Failed to get recipes" });
   }
 };
 
-exports.getMyRecipe = async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  let populate = req.query.populate;
-  console.log("populate: ", populate)
-  const { userId } = req;
-  if (populate) {
-    try {
-      const recipe = await User.findOne({ _id: userId }).populate("recipes")
+/* =========================
+   GET MY RECIPES (PROFILE)
+========================= */
+exports.getMyRecipe = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId)
+      .populate("recipes")
       .populate("likedRecipes")
       .populate("savedRecipes");
-      res.status(201).json(recipe);
-    } catch (error) {
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to get your recipes" });
+  }
+};
+
+/* =========================
+   UPDATE MY RECIPE
+========================= */
+exports.updateMyRecipe = async (req, res) => {
+  try {
+    const updated = await Recipe.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    ).populate("userId");
+
+    res.status(200).json({
+      message: "Recipe updated successfully",
+      updatedRecipe: updated,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update recipe" });
+  }
+};
+
+/* =========================
+   DELETE MY RECIPE (SECURE)
+========================= */
+exports.deleteMyRecipe = async (req, res) => {
+  try {
+    const recipe = await Recipe.findById(req.params.id);
+
+    if (!recipe) {
+      return res.status(404).json({ message: "Recipe not found" });
+    }
+
+    if (recipe.userId.toString() !== req.userId) {
       return res
-        .status(500)
-        .json({ message: "Failed to get your poster recipe", error });
-    }
-  } else {
-    res.status(404).json({ message: "Pass a parameter" });
-  }
-};
-
-exports.updateMyRecipe = async (req, res, next) => {
-  const { userId } = req;
-  const { id } = req.params;
-  console.log("in update recipe request", userId, id, req.body);
-  try {
-    let updated = await Recipe.findByIdAndUpdate(id, req.body, { new: true });
-    res
-      .status(200)
-      .json({ message: "Recipe updated successfully", updatedRecipe: updated });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Failed to update your poster recipe", error });
-  }
-};
-
-exports.deleteMyRecipe = async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) {
-    res
-      .status(201)
-      .json({ message: "Please login first to delete your recipe" });
-  }
-  const { userId } = req.body;
-  const { id } = req.params;
-  try {
-    const post = await Recipe.findOne({ _id: id });
-    if (post.userId != userId) {
-      return res
-        .status(400)
-        .json({ message: "You are not authorized to delete this recipe" });
-    }
-    await Recipe.findOneAndDelete({ _id: id });
-    res.status(201).json({ message: "Recipe deleted successfully" });
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Failed to delete your poster recipe", error });
-  }
-};
-
-exports.getFeed = async (req, res, next) => {
-  try {
-    const userId = req.userId;
-
-    // Find recipes that belong to the logged-in user and their friends
-    const user = await User.findById(userId);
-    const friendIds = user.friends.map((friend) => friend._id);
-
-    const recipes = await Recipe.find({
-      $or: [{ userId: userId }, { userId: { $in: friendIds } }],
-    }).sort({ _id: -1 });
-
-    // Populate the 'userId' field for each recipe
-    await Recipe.populate(recipes, { path: "userId" });
-
-    // Populate the 'comments' array for each recipe
-    await Recipe.populate(recipes, { path: "comments" });
-
-    // Populate the 'userId' field for each comment within the 'comments' array
-    for (const recipe of recipes) {
-      await Comment.populate(recipe.comments, { path: "userId" });
+        .status(403)
+        .json({ message: "Not authorized to delete this recipe" });
     }
 
-    res.status(200).json({ message: "User Feed Found", feed: recipes });
+    await Recipe.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ message: "Recipe deleted successfully" });
   } catch (error) {
-    console.error(error);
-    res.status(400).json({ error: "Couldn't fetch user feed" });
+    res.status(500).json({ message: "Failed to delete recipe" });
   }
 };
 
-exports.getSingleRecipe = async (req, res, next) => {
+/* =========================
+   USER FEED (FRIENDS + SELF)
+========================= */
+exports.getFeed = async (req, res) => {
   try {
-    const { id } = req.params;
-    console.log(id,"recipe id")
-    const recipe = await Recipe.findOne({ _id: id }).populate("userId")
+    const user = await User.findById(req.userId);
+    const friendIds = user.friends.map((f) => f._id);
+
+    const feed = await Recipe.find({
+      userId: { $in: [req.userId, ...friendIds] },
+    })
+      .sort({ createdAt: -1 })
+      .populate("userId")
+      .populate({
+        path: "comments",
+        populate: { path: "userId" },
+      });
+
+    res.status(200).json({ message: "User feed fetched", feed });
+  } catch (error) {
+    res.status(500).json({ message: "Couldn't fetch feed" });
+  }
+};
+
+/* =========================
+   SINGLE RECIPE
+========================= */
+exports.getSingleRecipe = async (req, res) => {
+  try {
+    const recipe = await Recipe.findById(req.params.id)
+      .populate("userId")
+      .populate({
+        path: "comments",
+        populate: { path: "userId" },
+      });
+
     res.status(200).json(recipe);
   } catch (error) {
-    console.error(error);
-    res.status(400).json({ error: "Couldn't fetch recipe" });
+    res.status(400).json({ message: "Couldn't fetch recipe" });
   }
-}
+};
