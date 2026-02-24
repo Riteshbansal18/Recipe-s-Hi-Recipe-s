@@ -3,6 +3,7 @@ require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
 const http = require("http");
+const path = require("path");
 const { Server } = require("socket.io");
 
 const app = express();
@@ -31,7 +32,14 @@ const chatRouter = require("./routes/chat.routes");
 
 app.use(cors());
 app.use(express.json());
-app.use("/images", express.static("images"));
+
+// 🔥 FIX: Serve images with absolute path and proper headers
+app.use("/images", express.static(path.join(__dirname, "images"), {
+  setHeaders: (res) => {
+    res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.set('Access-Control-Allow-Origin', '*');
+  }
+}));
 
 app.post("/upload", upload.array("file", 5), (req, res) => {
   res.status(200).json({ message: "File upload successful" });

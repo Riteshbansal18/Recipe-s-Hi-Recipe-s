@@ -5,7 +5,8 @@ const Notification = require("../models/Notification.model");
 
 exports.addNewComment = async (req, res, next) => {
   try {
-    const { text, userId, recipeId } = req.body;
+    const { text, recipeId } = req.body;
+    const userId = req.userId; // Get from auth middleware
 
     // Create a new comment
     const comment = new Comment({ text, userId, recipeId });
