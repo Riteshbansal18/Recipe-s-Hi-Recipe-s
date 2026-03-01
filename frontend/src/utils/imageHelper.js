@@ -1,8 +1,14 @@
 // Helper function to construct proper image URLs
-// Handles both old format (images/filename.jpg) and new format (filename.jpg)
+// Handles Cloudinary URLs and legacy local paths
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return null;
   
+  // If it's already a full Cloudinary URL, return as is
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+  
+  // Legacy support: Handle old local paths
   const apiUrl = process.env.REACT_APP_API_URL;
   
   // Normalize backslashes to forward slashes (Windows paths)

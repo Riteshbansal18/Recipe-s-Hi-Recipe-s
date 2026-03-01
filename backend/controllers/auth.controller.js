@@ -7,10 +7,10 @@ require("dotenv").config();
 exports.addNewUser = async (req, res, next) => {
   try {
     const { name, email, password, city, gender, bio } = req.body;
-    const profileImage = req.file ? req.file.filename : null;
+    // Cloudinary returns the full URL in req.file.path
+    const profileImage = req.file ? req.file.path : null;
     // Check if the email is already registered
     let existingUser = await User.findOne({ email: email });
-    // console.log(existingUser, "test");
     if (existingUser) {
       return res.status(400).json({ message: "Email already registered" });
     } else {
@@ -33,7 +33,6 @@ exports.addNewUser = async (req, res, next) => {
             likedRecipes: [],
           });
 
-          console.log(newUser);
           try {
             await newUser.save();
             res
@@ -54,32 +53,37 @@ exports.addNewUser = async (req, res, next) => {
 
 exports.loginUser = async (req, res, next) => {
   const { email, password } = req.body;
-  // console.log(req.body);/
   try {
     const user = await User.findOne({ email });
     if (user) {
       bcrypt.compare(password, user.password, function (err, result) {
-        // result == true
         if (err) {
           return res
             .status(400)
-            .json({ message: "Invalid password,Try again" });
+            .json({ message: "Invalid password, Try again" });
         }
-
-        var token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
-        res
-          .status(200)
-          .json({ message: `Welcome back ${user.name}`, token: token });
+        
+        // Check if password matches
+        if (result) {
+          var token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
+          return res
+            .status(200)
+            .json({ message: `Welcome back ${user.name}`, token: token });
+        } else {
+          return res
+            .status(400)
+            .json({ message: "Invalid password, Try again" });
+        }
       });
     } else {
       return res
         .status(400)
-        .json({ message: "User doesn't exit,try registering a account" });
+        .json({ message: "User doesn't exist, try registering an account" });
     }
   } catch (er) {
     return res
       .status(400)
-      .json({ message: "Something went wrong,try again later" });
+      .json({ message: "Something went wrong, try again later" });
   }
 };
 

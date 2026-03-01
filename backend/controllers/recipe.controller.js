@@ -12,9 +12,8 @@ exports.addNewRecipe = async (req, res) => {
 
     if (req.files && req.files.length > 0) {
       req.files.forEach((file) => {
-        // Store only the filename, not the full path
-        const filename = file.filename;
-        images.push(filename);
+        // Cloudinary returns the full URL in file.path
+        images.push(file.path);
       });
     }
 

@@ -33,7 +33,8 @@ const chatRouter = require("./routes/chat.routes");
 app.use(cors());
 app.use(express.json());
 
-// 🔥 FIX: Serve images with absolute path and proper headers
+// 🔥 Serve legacy local images (for backward compatibility)
+// New images will be stored on Cloudinary
 const uploadDir = process.env.UPLOAD_DIR || "images";
 app.use("/images", express.static(path.join(__dirname, uploadDir), {
   setHeaders: (res) => {
