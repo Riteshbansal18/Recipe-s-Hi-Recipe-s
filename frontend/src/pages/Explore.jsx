@@ -123,8 +123,6 @@ export const Explore = () => {
       });
   }, [filter]);
 
-  console.log(recipe, "recipe");
-
   // All types of cuisine
   const cuisines = [
     "Mexican",

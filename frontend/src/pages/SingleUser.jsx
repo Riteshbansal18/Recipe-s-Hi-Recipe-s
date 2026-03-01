@@ -47,7 +47,6 @@ import { getImageUrl } from "../utils/imageHelper";
     const [user, setUser] = useState({})
   
     // Function to edit profile
-console.log(user)
 
   
     useEffect(() => {
@@ -63,7 +62,6 @@ console.log(user)
           let user = res.data.filter((id) => {
             return id._id === userId
           })
-          console.log(user[0])
           setUser(user[0])
           setRecipes(user[0]?.recipes)
         })

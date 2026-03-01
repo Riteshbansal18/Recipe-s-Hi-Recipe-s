@@ -106,19 +106,16 @@ const Admin = () => {
     localStorage.getItem("token");
   const navigate = useNavigate();
 
-  console.log(recipe);
-
   const [nav, setNav] = useState("expanded");
 
   const handleNavbarToggle = () => {
-    console.log(nav);
     setNav((prevState) =>
       prevState === "expanded" ? "minimized" : "expanded"
     );
   };
 
   const handleDeleteRecipe = (id) => {
-    console.log(id);
+    // Delete recipe logic here
   };
 
   // Get all users

@@ -54,7 +54,6 @@ export const Account = () => {
     localStorage.getItem("token");
   // console.log(token)
   const user = useSelector((store) => store.authReducer.loggedInUser);
-  console.log("user", user);
   // const recipes = useSelector((store) => store.authReducer.recipes);
   const [recipes, setRecipes] = useState([]);
   const [likedRecipes, setLikedRecipes] = useState([]);
