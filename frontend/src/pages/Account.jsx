@@ -6,8 +6,6 @@ import {
   Flex,
   Image,
   Text,
-  UnorderedList,
-  ListItem,
   Grid,
   HStack,
   Tabs,
@@ -15,7 +13,6 @@ import {
   Tab,
   TabPanel,
   TabPanels,
-  Tooltip,
   useDisclosure,
   Modal,
   ModalOverlay,
@@ -32,7 +29,6 @@ import {
   EditableInput,
   Textarea,
   Heading,
-  Divider,
 } from "@chakra-ui/react";
 import { CheckIcon, CloseIcon, EditIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
@@ -109,286 +105,518 @@ export const Account = () => {
   }, [showRecipe]);
 
   return (
-    <Container
-      bgColor={"#EEF2F7"}
-      maxW="full"
-      height={"100vh"}
-      p={0}
-      paddingBlock={"3rem"}
-    >
-      {/* Modal for editting profile */}
-      <Modal isOpen={isOpen} onClose={onClose}>
+    <Box bg="#EEF2F7" minH="100vh" py={8}>
+      {/* Modal for editing profile */}
+      <Modal isOpen={isOpen} onClose={onClose} size="lg">
         <ModalOverlay />
-        <ModalContent>
-          <ModalHeader textTransform={"uppercase"} fontSize={"2xl"}>
-            Edit profile
+        <ModalContent borderRadius="lg" boxShadow="2xl">
+          <ModalHeader 
+            textTransform="uppercase" 
+            fontSize="xl" 
+            fontWeight="bold"
+            color="text"
+          >
+            Edit Profile
           </ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
-            {/* For name */}
-            <Center>
-              <Text fontWeight={"bold"} textTransform={"uppercase"}>
+          <ModalBody pb={6}>
+            <Box mb={5}>
+              <Text fontWeight="semibold" mb={2} color="secondary" fontSize="sm" textTransform="uppercase">
                 Name
               </Text>
-            </Center>
-            <Editable
-              mb="1rem"
-              textAlign="center"
-              defaultValue={user?.name}
-              fontSize="md"
-              isPreviewFocusable={false}
-              onChange={(newUserName) => setUserName(newUserName)}
-            >
-              <EditablePreview />
-              {/* Here is the custom input */}
-              <Textarea as={EditableInput} my="0.5rem" />
-              <EditableControls />
-            </Editable>
-            <Divider mb="1rem"></Divider>
+              <Editable
+                textAlign="left"
+                defaultValue={user?.name}
+                fontSize="md"
+                isPreviewFocusable={false}
+                onChange={(newUserName) => setUserName(newUserName)}
+              >
+                <EditablePreview 
+                  py={2} 
+                  px={3} 
+                  borderRadius="md" 
+                  _hover={{ bg: "gray.50" }}
+                />
+                <Textarea 
+                  as={EditableInput} 
+                  py={2} 
+                  px={3}
+                  borderRadius="md"
+                  focusBorderColor="primary.500"
+                />
+                <EditableControls />
+              </Editable>
+            </Box>
 
-            {/* For city */}
-            <Center>
-              <Text fontWeight={"bold"} textTransform={"uppercase"}>
+            <Box mb={5}>
+              <Text fontWeight="semibold" mb={2} color="secondary" fontSize="sm" textTransform="uppercase">
                 City
               </Text>
-            </Center>
-            <Editable
-              mb="1rem"
-              textAlign="center"
-              defaultValue={user?.city}
-              fontSize="md"
-              isPreviewFocusable={false}
-              onChange={(newUserCity) => setUserCity(newUserCity)}
-            >
-              <EditablePreview />
-              {/* Here is the custom input */}
-              <Textarea as={EditableInput} my="0.5rem" />
-              <EditableControls />
-            </Editable>
-            <Divider mb="1rem"></Divider>
+              <Editable
+                textAlign="left"
+                defaultValue={user?.city}
+                fontSize="md"
+                isPreviewFocusable={false}
+                onChange={(newUserCity) => setUserCity(newUserCity)}
+              >
+                <EditablePreview 
+                  py={2} 
+                  px={3} 
+                  borderRadius="md" 
+                  _hover={{ bg: "gray.50" }}
+                />
+                <Textarea 
+                  as={EditableInput} 
+                  py={2} 
+                  px={3}
+                  borderRadius="md"
+                  focusBorderColor="primary.500"
+                />
+                <EditableControls />
+              </Editable>
+            </Box>
 
-            {/* For bio */}
-            <Center>
-              <Text fontWeight={"bold"} textTransform="uppercase">
+            <Box mb={4}>
+              <Text fontWeight="semibold" mb={2} color="secondary" fontSize="sm" textTransform="uppercase">
                 Biography
               </Text>
-            </Center>
-            <Editable
-              mb="1rem"
-              textAlign="center"
-              defaultValue={user?.bio}
-              fontSize="md"
-              isPreviewFocusable={false}
-              onChange={(newUserBio) => setUserBio(newUserBio)}
-            >
-              <EditablePreview />
-              {/* Here is the custom input */}
-              <Textarea as={EditableInput} my="0.5rem" />
-              <EditableControls />
-            </Editable>
-            <Divider mb="1rem"></Divider>
+              <Editable
+                textAlign="left"
+                defaultValue={user?.bio}
+                fontSize="md"
+                isPreviewFocusable={false}
+                onChange={(newUserBio) => setUserBio(newUserBio)}
+              >
+                <EditablePreview 
+                  py={2} 
+                  px={3} 
+                  borderRadius="md" 
+                  _hover={{ bg: "gray.50" }}
+                />
+                <Textarea 
+                  as={EditableInput} 
+                  py={2} 
+                  px={3}
+                  minH="100px"
+                  borderRadius="md"
+                  focusBorderColor="primary.500"
+                />
+                <EditableControls />
+              </Editable>
+            </Box>
           </ModalBody>
           <ModalFooter>
-            <Button variant="outline" mr={"1rem"} onClick={onClose}>
-              Close
+            <Button 
+              variant="outline" 
+              mr={3} 
+              onClick={onClose}
+              borderColor="secondary"
+              color="secondary"
+            >
+              Cancel
             </Button>
-            <Button onClick={handleEditProfile}>Edit</Button>
+            <Button 
+              variant="solid"
+              onClick={handleEditProfile}
+              px={8}
+            >
+              Save Changes
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
-      <Flex flexDir={{ base: "column" }} bg="gray.100" p={4}>
-        {/* User detail section */}
-        <Box
-          w={"min(80rem,100%)"}
-          mx={"auto"}
-          display={"flex"}
-          flexDirection={{ base: "column", md: "row", lg: "row" }}
-          justifyContent={"space-between"}
-          gap="1rem"
-        >
-          {/* User Profile Info */}
-          <Box
-            p={2}
-            border="1px solid"
-            borderColor={"accent"}
-            borderRadius={"50%"}
-            overflow="hidden"
-            aspectRatio={1}
-            w={{ md: "35%", base: "50%", lg: "35%" }}
-            mx={{ base: "auto" }}
-          >
-            <Image
-              aspectRatio={1}
-              w="100%"
-              borderRadius="50%"
-              objectFit="cover"
-              src={user?.profileImage}
-              alt="Profile picture"
-            />
-          </Box>
-          <Center>
-            <Divider
-              orientation="vertical"
-              borderColor="secondary"
-              opacity={0.3}
-            />
-          </Center>
-          <Box
-            display="flex"
-            flexDir={{ base: "column" }}
-            alignItems={"stretch"}
-            justifyContent={"space-around"}
-          >
-            <Flex alignItems="center">
-              <Text
-                fontWeight="700"
-                fontSize="lg"
-                textTransform={"uppercase"}
-                mr="1rem"
-              >
-                {user?.name}
-              </Text>
-              <Text>{user?.city}</Text>
-              <Button
-                size="sm"
-                colorScheme="primary"
-                variant={"outline"}
-                onClick={onOpen}
-                ml="auto"
-              >
-                Edit Profile
-              </Button>
-            </Flex>
 
-            <Text p={0} m={0}>
-              {user?.bio}
-            </Text>
-            <UnorderedList
-              listStyleType="none"
-              display="flex"
-              justifyContent="space-between"
-              m="0"
-              textAlign={"center"}
+      <Container maxW="container.xl" px={{ base: 4, md: 6 }}>
+        {/* Profile Header Card */}
+        <Box
+          bg="white"
+          borderRadius="lg"
+          boxShadow="lg"
+          overflow="hidden"
+          mb={6}
+        >
+          <Box px={{ base: 6, md: 10 }} py={8}>
+            <Flex
+              direction={{ base: "column", md: "row" }}
+              align={{ base: "center", md: "flex-start" }}
+              gap={6}
             >
-              <ListItem>
-                <Text fontWeight="bold" textTransform="uppercase">
-                  Posts
+              {/* Profile Image */}
+              <Box
+                position="relative"
+                mb={{ base: 4, md: 0 }}
+              >
+                <Box
+                  p={1.5}
+                  border="3px solid"
+                  borderColor="accent"
+                  borderRadius="full"
+                  boxShadow="md"
+                  bg="gray.100"
+                >
+                  <Image
+                    w={{ base: "140px", md: "180px" }}
+                    h={{ base: "140px", md: "180px" }}
+                    borderRadius="full"
+                    objectFit="cover"
+                    src={getImageUrl(user?.profileImage)}
+                    alt=""
+                    fallback={
+                      <Center
+                        w={{ base: "140px", md: "180px" }}
+                        h={{ base: "140px", md: "180px" }}
+                        borderRadius="full"
+                        bg="primary.100"
+                      >
+                        <Text fontSize="4xl" fontWeight="bold" color="primary.500">
+                          {user?.name?.charAt(0)?.toUpperCase()}
+                        </Text>
+                      </Center>
+                    }
+                  />
+                </Box>
+              </Box>
+
+              {/* Profile Info */}
+              <Box 
+                flex="1" 
+                textAlign={{ base: "center", md: "left" }}
+              >
+                <Flex 
+                  direction={{ base: "column", md: "row" }}
+                  align={{ base: "center", md: "center" }}
+                  justify={{ base: "center", md: "space-between" }}
+                  mb={4}
+                >
+                  <Box>
+                    <Heading 
+                      size="xl" 
+                      mb={2}
+                      color="text"
+                      textTransform="uppercase"
+                      fontWeight="800"
+                    >
+                      {user?.name}
+                    </Heading>
+                    <Text color="secondary" fontSize="md" fontWeight="500">
+                      {user?.city}
+                    </Text>
+                  </Box>
+                  <Button
+                    variant="outline"
+                    onClick={onOpen}
+                    mt={{ base: 4, md: 0 }}
+                    leftIcon={<EditIcon />}
+                    size="md"
+                  >
+                    Edit Profile
+                  </Button>
+                </Flex>
+
+                <Text 
+                  color="text" 
+                  fontSize="md" 
+                  mb={6}
+                  maxW="2xl"
+                >
+                  {user?.bio || "No bio yet"}
                 </Text>
-                <Text>{user?.recipes.length}</Text>
-              </ListItem>
-              <ListItem>
-                <Text fontWeight="bold" textTransform="uppercase">
-                  Friends
-                </Text>
-                <Text>{user?.friends.length}</Text>
-              </ListItem>
-              <ListItem>
-                <Text fontWeight="bold" textTransform="uppercase">
-                  Saved Recipes
-                </Text>
-                <Text>{user?.savedRecipes.length}</Text>
-              </ListItem>
-              <ListItem>
-                <Text fontWeight="bold" textTransform="uppercase">
-                  Liked Recipes
-                </Text>
-                <Text>{user?.likedRecipes.length}</Text>
-              </ListItem>
-            </UnorderedList>
+
+                {/* Stats */}
+                <Grid
+                  templateColumns={{ base: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }}
+                  gap={4}
+                  maxW="2xl"
+                >
+                  <Box
+                    bg="primary.50"
+                    p={4}
+                    borderRadius="md"
+                    textAlign="center"
+                    transition="all 0.2s"
+                    _hover={{ transform: "translateY(-2px)", boxShadow: "md" }}
+                  >
+                    <Text fontSize="2xl" fontWeight="bold" color="primary.500">
+                      {user?.recipes.length}
+                    </Text>
+                    <Text fontSize="sm" color="secondary" fontWeight="600" textTransform="uppercase">
+                      Posts
+                    </Text>
+                  </Box>
+                  <Box
+                    bg="primary.50"
+                    p={4}
+                    borderRadius="md"
+                    textAlign="center"
+                    transition="all 0.2s"
+                    _hover={{ transform: "translateY(-2px)", boxShadow: "md" }}
+                  >
+                    <Text fontSize="2xl" fontWeight="bold" color="primary.500">
+                      {user?.friends.length}
+                    </Text>
+                    <Text fontSize="sm" color="secondary" fontWeight="600" textTransform="uppercase">
+                      Friends
+                    </Text>
+                  </Box>
+                  <Box
+                    bg="primary.50"
+                    p={4}
+                    borderRadius="md"
+                    textAlign="center"
+                    transition="all 0.2s"
+                    _hover={{ transform: "translateY(-2px)", boxShadow: "md" }}
+                  >
+                    <Text fontSize="2xl" fontWeight="bold" color="primary.500">
+                      {user?.savedRecipes.length}
+                    </Text>
+                    <Text fontSize="sm" color="secondary" fontWeight="600" textTransform="uppercase">
+                      Saved
+                    </Text>
+                  </Box>
+                  <Box
+                    bg="primary.50"
+                    p={4}
+                    borderRadius="md"
+                    textAlign="center"
+                    transition="all 0.2s"
+                    _hover={{ transform: "translateY(-2px)", boxShadow: "md" }}
+                  >
+                    <Text fontSize="2xl" fontWeight="bold" color="primary.500">
+                      {user?.likedRecipes.length}
+                    </Text>
+                    <Text fontSize="sm" color="secondary" fontWeight="600" textTransform="uppercase">
+                      Likes
+                    </Text>
+                  </Box>
+                </Grid>
+              </Box>
+            </Flex>
           </Box>
         </Box>
 
-        {/* User Posts and others */}
-        <Box w={"min(80rem,100%)"} m={"auto"} mt="1rem">
-          {/* Grid View of Images */}
-          <Tabs colorScheme="primary" isFitted>
-            <TabList>
-              <Tab onClick={() => setShowRecipe("recipes")}>Posts</Tab>
-              <Tab onClick={() => setShowRecipe("savedRecipes")}>
+        {/* Recipes Section */}
+        <Box
+          bg="white"
+          borderRadius="lg"
+          boxShadow="lg"
+          overflow="hidden"
+        >
+          <Tabs colorScheme="primary" variant="line">
+            <TabList borderBottom="2px solid" borderColor="gray.200">
+              <Tab 
+                onClick={() => setShowRecipe("recipes")}
+                fontWeight="600"
+                textTransform="uppercase"
+                fontSize="sm"
+                _selected={{ 
+                  color: "primary.500", 
+                  borderColor: "primary.500"
+                }}
+              >
+                My Posts
+              </Tab>
+              <Tab 
+                onClick={() => setShowRecipe("savedRecipes")}
+                fontWeight="600"
+                textTransform="uppercase"
+                fontSize="sm"
+                _selected={{ 
+                  color: "primary.500", 
+                  borderColor: "primary.500"
+                }}
+              >
                 Saved Recipes
               </Tab>
-              <Tab onClick={() => setShowRecipe("likedRecipes")}>
-                Recent Likes
+              <Tab 
+                onClick={() => setShowRecipe("likedRecipes")}
+                fontWeight="600"
+                textTransform="uppercase"
+                fontSize="sm"
+                _selected={{ 
+                  color: "primary.500", 
+                  borderColor: "primary.500"
+                }}
+              >
+                Liked Recipes
               </Tab>
             </TabList>
+
             <TabPanels>
-              <TabPanel>
-                <Grid templateColumns="repeat(3, 1fr)" gap={2}>
-                  {recipes?.length > 0 &&
-                    recipes.map((ele, index) => (
-                      <Tooltip
-                        bg="accent"
-                        px={4}
-                        py={2}
-                        label={`Likes: ${ele?.likes?.length}, Comments: ${ele?.comments?.length}`}
+              <TabPanel p={6}>
+                {recipes?.length > 0 ? (
+                  <Grid 
+                    templateColumns={{ 
+                      base: "repeat(2, 1fr)", 
+                      md: "repeat(3, 1fr)",
+                      lg: "repeat(4, 1fr)" 
+                    }} 
+                    gap={4}
+                  >
+                    {recipes.map((ele, index) => (
+                      <Box
                         key={index}
+                        position="relative"
+                        borderRadius="md"
+                        overflow="hidden"
+                        cursor="pointer"
+                        transition="all 0.2s"
+                        boxShadow="md"
+                        _hover={{ 
+                          transform: "scale(1.02)", 
+                          boxShadow: "xl" 
+                        }}
+                        onClick={() => navigate(`/recipe/${ele._id}`)}
                       >
-                        <div>
-                          <Image
-                            src={getImageUrl(ele.images[0])}
-                            alt="Recipe Image"
-                            boxSize="100%"
-                            objectFit="cover"
-                            onClick={() => navigate(`/recipe/${ele._id}`)}
-                          />
-                        </div>
-                      </Tooltip>
+                        <Image
+                          src={getImageUrl(ele.images[0])}
+                          alt="Recipe"
+                          w="100%"
+                          h="250px"
+                          objectFit="cover"
+                        />
+                        <Box
+                          position="absolute"
+                          bottom={0}
+                          left={0}
+                          right={0}
+                          bg="linear-gradient(to top, rgba(0,0,0,0.8), transparent)"
+                          p={3}
+                        >
+                          <HStack spacing={3} color="white" fontSize="sm">
+                            <Text>{ele?.likes?.length} Likes</Text>
+                            <Text>{ele?.comments?.length} Comments</Text>
+                          </HStack>
+                        </Box>
+                      </Box>
                     ))}
-                </Grid>
+                  </Grid>
+                ) : (
+                  <Center py={12}>
+                    <Text color="secondary" fontSize="lg">
+                      No posts yet
+                    </Text>
+                  </Center>
+                )}
               </TabPanel>
-              <TabPanel>
-                <Grid templateColumns="repeat(3, 1fr)" gap={2}>
-                  {savedRecipes?.length > 0 &&
-                    savedRecipes.map((ele, index) => (
-                      <Tooltip
-                        bg="accent"
-                        px={4}
-                        py={2}
-                        label={`Likes: ${ele?.likes?.length}, Comments: ${ele?.comments?.length}`}
+
+              <TabPanel p={6}>
+                {savedRecipes?.length > 0 ? (
+                  <Grid 
+                    templateColumns={{ 
+                      base: "repeat(2, 1fr)", 
+                      md: "repeat(3, 1fr)",
+                      lg: "repeat(4, 1fr)" 
+                    }} 
+                    gap={4}
+                  >
+                    {savedRecipes.map((ele, index) => (
+                      <Box
                         key={index}
+                        position="relative"
+                        borderRadius="md"
+                        overflow="hidden"
+                        cursor="pointer"
+                        transition="all 0.2s"
+                        boxShadow="md"
+                        _hover={{ 
+                          transform: "scale(1.02)", 
+                          boxShadow: "xl" 
+                        }}
+                        onClick={() => navigate(`/recipe/${ele._id}`)}
                       >
-                        <div>
-                          <Image
-                            src={getImageUrl(ele.images[0])}
-                            alt="Recipe Image"
-                            boxSize="100%"
-                            objectFit="cover"
-                            onClick={() => navigate(`/recipe/${ele._id}`)}
-                          />
-                        </div>
-                      </Tooltip>
+                        <Image
+                          src={getImageUrl(ele.images[0])}
+                          alt="Recipe"
+                          w="100%"
+                          h="250px"
+                          objectFit="cover"
+                        />
+                        <Box
+                          position="absolute"
+                          bottom={0}
+                          left={0}
+                          right={0}
+                          bg="linear-gradient(to top, rgba(0,0,0,0.8), transparent)"
+                          p={3}
+                        >
+                          <HStack spacing={3} color="white" fontSize="sm">
+                            <Text>{ele?.likes?.length} Likes</Text>
+                            <Text>{ele?.comments?.length} Comments</Text>
+                          </HStack>
+                        </Box>
+                      </Box>
                     ))}
-                </Grid>
+                  </Grid>
+                ) : (
+                  <Center py={12}>
+                    <Text color="secondary" fontSize="lg">
+                      No saved recipes yet
+                    </Text>
+                  </Center>
+                )}
               </TabPanel>
-              <TabPanel>
-                <Grid templateColumns="repeat(3, 1fr)" gap={2}>
-                  {likedRecipes?.length > 0 &&
-                    likedRecipes.map((ele, index) => (
-                      <Tooltip
-                        bg="accent"
-                        px={4}
-                        py={2}
-                        label={`Likes: ${ele?.likes?.length}, Comments: ${ele?.comments?.length}`}
+
+              <TabPanel p={6}>
+                {likedRecipes?.length > 0 ? (
+                  <Grid 
+                    templateColumns={{ 
+                      base: "repeat(2, 1fr)", 
+                      md: "repeat(3, 1fr)",
+                      lg: "repeat(4, 1fr)" 
+                    }} 
+                    gap={4}
+                  >
+                    {likedRecipes.map((ele, index) => (
+                      <Box
                         key={index}
+                        position="relative"
+                        borderRadius="md"
+                        overflow="hidden"
+                        cursor="pointer"
+                        transition="all 0.2s"
+                        boxShadow="md"
+                        _hover={{ 
+                          transform: "scale(1.02)", 
+                          boxShadow: "xl" 
+                        }}
+                        onClick={() => navigate(`/recipe/${ele._id}`)}
                       >
-                        <div>
-                          <Image
-                            src={getImageUrl(ele.images[0])}
-                            alt="Recipe Image"
-                            boxSize="100%"
-                            objectFit="cover"
-                            onClick={() => navigate(`/recipe/${ele._id}`)}
-                          />
-                        </div>
-                      </Tooltip>
+                        <Image
+                          src={getImageUrl(ele.images[0])}
+                          alt="Recipe"
+                          w="100%"
+                          h="250px"
+                          objectFit="cover"
+                        />
+                        <Box
+                          position="absolute"
+                          bottom={0}
+                          left={0}
+                          right={0}
+                          bg="linear-gradient(to top, rgba(0,0,0,0.8), transparent)"
+                          p={3}
+                        >
+                          <HStack spacing={3} color="white" fontSize="sm">
+                            <Text>{ele?.likes?.length} Likes</Text>
+                            <Text>{ele?.comments?.length} Comments</Text>
+                          </HStack>
+                        </Box>
+                      </Box>
                     ))}
-                </Grid>
+                  </Grid>
+                ) : (
+                  <Center py={12}>
+                    <Text color="secondary" fontSize="lg">
+                      No liked recipes yet
+                    </Text>
+                  </Center>
+                )}
               </TabPanel>
             </TabPanels>
           </Tabs>
         </Box>
-      </Flex>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 
