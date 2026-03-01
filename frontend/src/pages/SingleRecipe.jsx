@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Carousel } from "../components/Feed/SingleRecipeCarousel";
 import { useParams } from "react-router-dom";
 import { CheckIcon } from "@chakra-ui/icons";
+import { getImageUrl } from "../utils/imageHelper";
 import {
   Box,
   Flex,
@@ -55,7 +56,7 @@ function SingleRecipe() {
           userId: {
             ...data.userId,
             profileImage: data.userId?.profileImage
-              ? `${process.env.REACT_APP_API_URL}/${data.userId.profileImage}`
+              ? getImageUrl(data.userId.profileImage)
               : null,
           },
         };

@@ -73,20 +73,8 @@ export const getFeed = (token) => async (dispatch) => {
       }
     );
 
-    const recipes = res.data.feed.map((recipe) => ({
-      ...recipe,
-      images: recipe.images.map(
-        (img) => `${API_URL}/${img}`
-      ),
-      userId: {
-        ...recipe.userId,
-        profileImage: recipe.userId?.profileImage
-          ? `${API_URL}/${recipe.userId.profileImage}`
-          : null,
-      },
-    }));
-
-    dispatch({ type: GET_FEED_SUCCESS, payload: recipes });
+    // Don't transform image URLs here - let components handle it
+    dispatch({ type: GET_FEED_SUCCESS, payload: res.data.feed });
   } catch (err) {
     dispatch({ type: GET_FEED_ERROR });
   }

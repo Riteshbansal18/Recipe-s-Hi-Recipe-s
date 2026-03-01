@@ -11,7 +11,11 @@ exports.addNewRecipe = async (req, res) => {
     const images = [];
 
     if (req.files && req.files.length > 0) {
-      req.files.forEach((file) => images.push(file.path));
+      req.files.forEach((file) => {
+        // Store only the filename, not the full path
+        const filename = file.filename;
+        images.push(filename);
+      });
     }
 
     const newRecipe = new Recipe({

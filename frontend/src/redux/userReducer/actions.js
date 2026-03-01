@@ -139,7 +139,12 @@ export const getAllNonFriends = (token) => async (dispatch) => {
 
     const users = response.data.notFriends;
     users.forEach((user) => {
-      user.profileImage = `${process.env.REACT_APP_API_URL}/${user.profileImage}`;
+      if (user.profileImage) {
+        const normalized = user.profileImage.replace(/\\/g, '/');
+        user.profileImage = normalized.startsWith('images/')
+          ? `${process.env.REACT_APP_API_URL}/${normalized}`
+          : `${process.env.REACT_APP_API_URL}/images/${normalized}`;
+      }
     });
     // console.log(users);
     dispatch({ type: GET_NONFRIEND_SUCCESS, payload: users });
@@ -165,7 +170,12 @@ export const getRequestsUsers = (token) => async (dispatch) => {
 
     const users = response.data.requestUsers;
     users.forEach((user) => {
-      user.profileImage = `${process.env.REACT_APP_API_URL}/${user.profileImage}`;
+      if (user.profileImage) {
+        const normalized = user.profileImage.replace(/\\/g, '/');
+        user.profileImage = normalized.startsWith('images/')
+          ? `${process.env.REACT_APP_API_URL}/${normalized}`
+          : `${process.env.REACT_APP_API_URL}/images/${normalized}`;
+      }
     });
     // console.log(users);
     dispatch({ type: GET_REQUESTSUSER_SUCCESS, payload: users });
@@ -191,7 +201,12 @@ export const getFriends = (token) => async (dispatch) => {
 
     const users = response.data.friends;
     users.forEach((user) => {
-      user.profileImage = `${process.env.REACT_APP_API_URL}/${user.profileImage}`;
+      if (user.profileImage) {
+        const normalized = user.profileImage.replace(/\\/g, '/');
+        user.profileImage = normalized.startsWith('images/')
+          ? `${process.env.REACT_APP_API_URL}/${normalized}`
+          : `${process.env.REACT_APP_API_URL}/images/${normalized}`;
+      }
     });
     // console.log(users);
     dispatch({ type: GET_FRIENDS_SUCCESS, payload: users });

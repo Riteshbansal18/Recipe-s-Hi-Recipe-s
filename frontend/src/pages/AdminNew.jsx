@@ -48,6 +48,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { styled } from "styled-components";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { useSelector } from "react-redux";
+import { getImageUrl } from "../utils/imageHelper";
 import axios from "axios";
 import Contribution from "../components/Charts/Contribution";
 import MostLikes from "../components/Charts/MostLikes";
@@ -375,7 +376,7 @@ export default function AdminNew() {
                               <Avatar
                                 size="lg"
                                 name={ele?.name}
-                                src={`${process.env.REACT_APP_API_URL}/${ele?.profileImage}`}
+                                src={getImageUrl(ele?.profileImage)}
                               />
                               <Flex flexDir={"column"} textAlign={"left"}>
                                 <Heading size={"md"} fontWeight={"bold"}>
@@ -422,7 +423,7 @@ export default function AdminNew() {
                                             <Avatar
                                               size="lg"
                                               name={e?.name}
-                                              src={`${process.env.REACT_APP_API_URL}/${e?.profileImage}`}
+                                              src={getImageUrl(e?.profileImage)}
                                             />
                                             <Flex
                                               flexDir={"column"}
@@ -452,7 +453,7 @@ export default function AdminNew() {
                                       <Image
                                         height={"200px"}
                                         width={"200px"}
-                                        src={`${process.env.REACT_APP_API_URL}/${e?.images[0]}`}
+                                        src={getImageUrl(e?.images[0])}
                                       />
                                       <Text fontWeight={"bold"}>
                                         {e?.title}
@@ -504,7 +505,7 @@ export default function AdminNew() {
                                   <Avatar
                                     size="lg"
                                     name={ele?.userId?.name}
-                                    src={`${process.env.REACT_APP_API_URL}/${ele?.userId?.profileImage}`}
+                                    src={getImageUrl(ele?.userId?.profileImage)}
                                   />
                                   <Flex flexDir={"column"} textAlign={"left"}>
                                     <Text fontWeight={"bold"}>

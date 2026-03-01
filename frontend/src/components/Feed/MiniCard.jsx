@@ -121,7 +121,7 @@ const MiniCard_Request = ({
   );
 };
 
-const socket = io.connect("https://concerned-picture-9849.onrender.com");
+const socket = io.connect(process.env.REACT_APP_API_URL);
 
 socket.on("connect", () => {
   console.log("Connected to the Socket.io server");

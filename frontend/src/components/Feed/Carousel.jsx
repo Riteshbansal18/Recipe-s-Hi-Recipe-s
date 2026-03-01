@@ -1,6 +1,7 @@
 import { Box, Flex, Text, Image, HStack, Icon } from "@chakra-ui/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 import { useState } from "react";
+import { getImageUrl } from "../../utils/imageHelper";
 
 export const Carousel = ({ images }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -46,7 +47,7 @@ export const Carousel = ({ images }) => {
                 {sid + 1} / {slidesCount}
               </Text>
               <Image
-                src={image}
+                src={getImageUrl(image)}
                 alt={`carousel image ${sid + 1}`}
                 boxSize="full"
                 backgroundSize="cover"

@@ -7,7 +7,7 @@ require("dotenv").config();
 exports.addNewUser = async (req, res, next) => {
   try {
     const { name, email, password, city, gender, bio } = req.body;
-    const profileImage = req.file ? req.file.path : null;
+    const profileImage = req.file ? req.file.filename : null;
     // Check if the email is already registered
     let existingUser = await User.findOne({ email: email });
     // console.log(existingUser, "test");

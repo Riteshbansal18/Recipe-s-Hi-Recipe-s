@@ -38,6 +38,7 @@ import { CheckIcon, CloseIcon, EditIcon } from "@chakra-ui/icons";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserData, updateUserDetails } from "../redux/authReducer/actions";
+import { getImageUrl } from "../utils/imageHelper";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@chakra-ui/react";
 import axios from "axios";
@@ -325,7 +326,7 @@ export const Account = () => {
                       >
                         <div>
                           <Image
-                            src={`${process.env.REACT_APP_API_URL}/${ele.images[0]}`}
+                            src={getImageUrl(ele.images[0])}
                             alt="Recipe Image"
                             boxSize="100%"
                             objectFit="cover"
@@ -349,7 +350,7 @@ export const Account = () => {
                       >
                         <div>
                           <Image
-                            src={`${process.env.REACT_APP_API_URL}/${ele.images[0]}`}
+                            src={getImageUrl(ele.images[0])}
                             alt="Recipe Image"
                             boxSize="100%"
                             objectFit="cover"
@@ -373,7 +374,7 @@ export const Account = () => {
                       >
                         <div>
                           <Image
-                            src={`${process.env.REACT_APP_API_URL}/${ele.images[0]}`}
+                            src={getImageUrl(ele.images[0])}
                             alt="Recipe Image"
                             boxSize="100%"
                             objectFit="cover"

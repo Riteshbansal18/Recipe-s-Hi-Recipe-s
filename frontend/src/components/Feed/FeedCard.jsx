@@ -26,6 +26,7 @@ import axios from "axios";
 import { updateRecipe, getFeed } from "../../redux/recipeReducer/actions";
 import { updateUser } from "../../redux/userReducer/actions";
 import { useNavigate } from "react-router-dom";
+import { getImageUrl } from "../../utils/imageHelper";
 
 export default function FeedCard({ recipe }) {
   const toast = useToast();
@@ -224,7 +225,7 @@ export default function FeedCard({ recipe }) {
       <CardHeader>
         <Flex justify="space-between" align="center">
           <Flex gap="4" align="center">
-            <Avatar src={recipe.userId?.profileImage} />
+            <Avatar src={getImageUrl(recipe.userId?.profileImage)} />
             <Box>
               <Heading size="md">{recipe.userId?.name}</Heading>
               <Text fontSize="sm">{recipe.caption}</Text>
@@ -305,7 +306,7 @@ export default function FeedCard({ recipe }) {
           .slice(-3)
           .map((comment) => (
             <Flex key={comment._id} mt={3} gap={3}>
-              <Avatar size="sm" src={comment.userId.profileImage} />
+              <Avatar size="sm" src={getImageUrl(comment.userId.profileImage)} />
               <Box>
                 <Text fontWeight="bold">{comment.userId.name}</Text>
                 <Text fontSize="sm">{comment.text}</Text>

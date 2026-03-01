@@ -37,6 +37,7 @@ import {
   import { CheckIcon, CloseIcon, EditIcon } from "@chakra-ui/icons";
   import React, { useEffect, useState } from "react";
   import { useNavigate, useParams } from "react-router-dom";
+import { getImageUrl } from "../utils/imageHelper";
   import axios from "axios";
   
   export const SingleUser = () => {
@@ -108,7 +109,7 @@ console.log(user)
                 maxH="20rem"
                 borderRadius="50%"
                 objectFit="cover"
-                src={`${process.env.REACT_APP_API_URL}/${user?.profileImage}`}
+                src={getImageUrl(user?.profileImage)}
                 alt="Profile picture"
               />
             </Box>
@@ -178,7 +179,7 @@ console.log(user)
                         >
                           <div>
                             <Image
-                              src={`${process.env.REACT_APP_API_URL}/${ele.images[0]}`}
+                              src={getImageUrl(ele.images[0])}
                               alt="Recipe Image"
                               boxSize="100%"
                               objectFit="cover"

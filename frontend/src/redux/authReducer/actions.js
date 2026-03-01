@@ -44,7 +44,7 @@ export const createUser = (newUser, toast, navigate) => async (dispatch) => {
     dispatch({ type: CREATE_USER_ERROR });
     toast({
       title: "SignUp Failed",
-      description: `${error.response.data.message}`,
+      description: error.response?.data?.message || "Registration failed",
       status: "error",
       duration: 9000,
       isClosable: true,
@@ -84,7 +84,7 @@ export const loginUser = (userObj, toast, navigate) => async (dispatch) => {
     dispatch({ type: LOGIN_USER_ERROR });
     toast({
       title: "Login Failed",
-      description: `${error.response.data.message}`,
+      description: error.response?.data?.message || "Login failed",
       status: "error",
       duration: 3000,
       isClosable: true,
@@ -117,7 +117,7 @@ export const logoutUser = (token, toast, navigate) => async (dispatch) => {
     console.log("Error whlie logging out:", error);
     toast({
       title: "Logout Failed",
-      description: `${error.response.data.message}`,
+      description: error.response?.data?.message || "Logout failed",
       status: "error",
       duration: 3000,
       isClosable: true,
@@ -142,14 +142,16 @@ export const getUserData = (token, toast) => async (dispatch) => {
     );
     console.log(response.data.user);
     const userWithProfileImage = response.data.user;
-    userWithProfileImage.profileImage = `${process.env.REACT_APP_API_URL}/${userWithProfileImage.profileImage}`;
+    if (userWithProfileImage.profileImage) {
+      userWithProfileImage.profileImage = `${process.env.REACT_APP_API_URL}/images/${userWithProfileImage.profileImage}`;
+    }
     dispatch({ type: GET_LOGGEDUSER_SUCCESS, payload: userWithProfileImage });
   } catch (error) {
     console.log("Error fetching user data:", error);
     dispatch({ type: GET_LOGGEDUSER_ERROR });
     toast({
       title: "Failed To Load User Details",
-      description: `${error.response.data.message}`,
+      description: error.response?.data?.message || "Could not load user data",
       status: "error",
       duration: 3000,
       isClosable: true,
@@ -181,7 +183,7 @@ export const updateUserDetails =
       .catch((err) => {
         toast({
           title: "Your data was successfully updated",
-          description: `${err.response.data.message}`,
+          description: err.response?.data?.message || "Update failed",
           status: "error",
           duration: 3000,
           isClosable: true,

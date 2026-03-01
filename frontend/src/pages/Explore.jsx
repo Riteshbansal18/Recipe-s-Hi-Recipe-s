@@ -41,6 +41,7 @@ import { BiLike, BiShare } from "react-icons/bi";
 import styled from "@emotion/styled";
 import { useNavigate } from "react-router-dom";
 import { Carousel } from "../components/Feed/SingleRecipeCarousel";
+import { getImageUrl } from "../utils/imageHelper";
 
 export const Explore = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -108,7 +109,13 @@ export const Explore = () => {
           });
         }
 
-        setRecipe(filteredRecipes); // Set the state with the filtered or unfiltered recipes
+        // Transform image paths to full URLs
+        const recipesWithFullUrls = filteredRecipes.map((recipe) => ({
+          ...recipe,
+          images: recipe.images.map((img) => getImageUrl(img)),
+        }));
+
+        setRecipe(recipesWithFullUrls); // Set the state with the filtered or unfiltered recipes
         setSelectedOption(null);
       })
       .catch((err) => {
